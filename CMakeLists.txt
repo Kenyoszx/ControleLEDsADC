@@ -57,7 +57,7 @@ target_include_directories(Joystick PRIVATE
 target_link_libraries(Joystick 
         hardware_i2c
         hardware_clocks
-        
+        hardware_adc
         )
 
 pico_add_extra_outputs(Joystick)
