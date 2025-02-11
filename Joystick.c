@@ -14,7 +14,7 @@
 #define JOYSTICK_X_PIN 26 // GPIO para eixo X
 #define JOYSTICK_Y_PIN 27 // GPIO para eixo Y
 #define JOYSTICK_PB 22    // GPIO para botão do Joystick
-#define Botao_A 5         // GPIO para botão A
+#define BUTTON_A 5         // GPIO para botão A
 
 //Constantes
 #define I2C_PORT i2c1
@@ -22,6 +22,9 @@
 #define WRAP_PERIOD 20000
 #define PWM_DIVISOR 125.0
 #define MOTOR_STEP 5
+
+//Variáveis Globais
+static volatile uint32_t last_time = 0; // Armazena o tempo do último evento (em microssegundos)
 
 //Protótipos das Funções
 refresh_led_state(uint16_t x,uint16_t y);
@@ -32,10 +35,14 @@ int main()
     gpio_init(JOYSTICK_PB);
     gpio_set_dir(JOYSTICK_PB, GPIO_IN);
     gpio_pull_up(JOYSTICK_PB);
+    gpio_set_irq_enabled_with_callback(JOYSTICK_PB, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler); // Rotina de Interrupção
 
-    gpio_init(Botao_A);
-    gpio_set_dir(Botao_A, GPIO_IN);
-    gpio_pull_up(Botao_A);
+
+    gpio_init(BUTTON_A);
+    gpio_set_dir(BUTTON_A, GPIO_IN);
+    gpio_pull_up(BUTTON_A);
+    gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler); // Rotina de Interrupção
+
 
     // I2C Initialisation. Using it at 400Khz.
     i2c_init(I2C_PORT, 400 * 1000);
@@ -74,4 +81,26 @@ int main()
 
 refresh_led_state(uint16_t x,uint16_t y){
 
+}
+static void gpio_irq_handler(uint gpio, uint32_t events)
+{
+    // Configura a ação ao apertar o botão e implementa o Debouce
+
+    // Obtém o tempo atual em microssegundos
+    uint32_t current_time = to_us_since_boot(get_absolute_time());
+
+    // Verifica se passou tempo suficiente desde o último evento
+    if (current_time - last_time > 50000) // 49 ms de debouncing
+    {
+        last_time = current_time; // Atualiza o tempo do último evento
+        // Código Função:
+        if (gpio == BUTTON_A)
+        {
+            
+        }
+        else if (gpio == JOYSTICK_PB)
+        {
+            
+        }
+    }
 }
