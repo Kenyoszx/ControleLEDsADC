@@ -15,6 +15,9 @@
 #define JOYSTICK_Y_PIN 27 // GPIO para eixo Y
 #define JOYSTICK_PB 22    // GPIO para botão do Joystick
 #define BUTTON_A 5         // GPIO para botão A
+#define LED_PIN_GREEN 11
+#define LED_PIN_BLUE 12
+#define LED_PIN_RED 13
 
 //Constantes
 #define I2C_PORT i2c1
@@ -28,7 +31,10 @@ static volatile uint32_t last_time = 0; // Armazena o tempo do último evento (e
 
 //Protótipos das Funções
 refresh_led_state(uint16_t x,uint16_t y);
-
+uint init_PWM_Red_LED();
+uint init_PWM_Blue_LED();
+void wrapHandlerRED();
+void wrapHandlerBLUE();
 int main()
 {
     stdio_init_all();
@@ -43,8 +49,10 @@ int main()
     gpio_pull_up(BUTTON_A);
     gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler); // Rotina de Interrupção
 
+    gpio_init(LED_PIN_GREEN);
+    gpio_set_dir(LED_PIN_GREEN, GPIO_OUT);
+    gpio_put(LED_PIN_GREEN, 0);
 
-    // I2C Initialisation. Using it at 400Khz.
     i2c_init(I2C_PORT, 400 * 1000);
 
     gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);                    // Set the GPIO pin function to I2C
@@ -103,4 +111,38 @@ static void gpio_irq_handler(uint gpio, uint32_t events)
             
         }
     }
+}
+uint init_PWM_Red_LED(){
+    // inicializa o pwm do ServoMotor
+
+    gpio_set_function(LED_PIN_RED, GPIO_FUNC_PWM);        // habilitar o pino GPIO como PWM
+    uint slice = pwm_gpio_to_slice_num(LED_PIN_RED); // obter o canal PWM da GPIO
+
+    pwm_clear_irq(slice);                            // Reseta a flag de interrupção para o slice do motor
+    irq_set_exclusive_handler(PWM_IRQ_WRAP, wrapHandlerRED); // interrupção quando o contador do slice atinge o wrap
+    irq_set_enabled(PWM_IRQ_WRAP, true);                  // Habilitar ou desabilitar uma interrupção específica
+
+    pwm_set_clkdiv(slice, PWM_DIVISOR); // define o divisor de clock do PWM
+    pwm_set_wrap(slice, WRAP_PERIOD);   // definir o valor de wrap
+    pwm_set_gpio_level(LED_PIN_RED, 0);     // definir o ciclo de trabalho (duty cycle) do pwm
+    pwm_set_enabled(slice, true);       // habilita o pwm no slice correspondente
+
+    return (slice);
+}
+uint init_PWM_Blue_LED(){
+    // inicializa o pwm do ServoMotor
+
+    gpio_set_function(LED_PIN_BLUE, GPIO_FUNC_PWM);        // habilitar o pino GPIO como PWM
+    uint slice = pwm_gpio_to_slice_num(LED_PIN_BLUE); // obter o canal PWM da GPIO
+
+    pwm_clear_irq(slice);                            // Reseta a flag de interrupção para o slice do motor
+    irq_set_exclusive_handler(PWM_IRQ_WRAP, wrapHandlerBLUE); // interrupção quando o contador do slice atinge o wrap
+    irq_set_enabled(PWM_IRQ_WRAP, true);                  // Habilitar ou desabilitar uma interrupção específica
+
+    pwm_set_clkdiv(slice, PWM_DIVISOR); // define o divisor de clock do PWM
+    pwm_set_wrap(slice, WRAP_PERIOD);   // definir o valor de wrap
+    pwm_set_gpio_level(LED_PIN_BLUE, 0);     // definir o ciclo de trabalho (duty cycle) do pwm
+    pwm_set_enabled(slice, true);       // habilita o pwm no slice correspondente
+
+    return (slice);
 }
