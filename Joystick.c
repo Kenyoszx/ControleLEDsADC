@@ -46,6 +46,7 @@ int main()
     // Variáveis
     uint16_t adc_value_x;
     uint16_t adc_value_y;
+    uint16_t pos_x;
     slice_red = pwm_init_gpio(LED_PIN_RED, WRAP_PERIOD);
     slice_blue = pwm_init_gpio(LED_PIN_BLUE, WRAP_PERIOD);
     bool cor = true;
@@ -79,9 +80,9 @@ int main()
         adc_value_y = adc_read();
         refresh_led_state_X(adc_value_x);
         refresh_led_state_Y(adc_value_y);
-
+        pos_x = ((adc_value_x * -1) + 4095);
         ssd1306_fill(&ssd, false);
-        ssd1306_rect(&ssd,adc_value_x/64,adc_value_y/32,8,8,true,true);
+        ssd1306_rect(&ssd,pos_x/64,adc_value_y/32,8,8,true,true);
         ssd1306_send_data(&ssd);
 
         sleep_ms(100);
