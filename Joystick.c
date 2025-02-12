@@ -80,6 +80,10 @@ int main()
         refresh_led_state_X(adc_value_x);
         refresh_led_state_Y(adc_value_y);
 
+        ssd1306_fill(&ssd, false);
+        ssd1306_rect(&ssd,adc_value_x/64,adc_value_y/32,8,8,true,true);
+        ssd1306_send_data(&ssd);
+
         sleep_ms(100);
     }
 }
@@ -147,7 +151,6 @@ static void gpio_irq_handler(uint gpio, uint32_t events)
         // Código Função:
         if (gpio == BUTTON_A)
         {
-            printf("BOTÃO A");
             pwm_state = !pwm_state;
             pwm_set_enabled(slice_blue,pwm_state);
             pwm_set_enabled(slice_red,pwm_state);
