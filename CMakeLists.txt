@@ -58,6 +58,7 @@ target_link_libraries(Joystick
         hardware_i2c
         hardware_clocks
         hardware_adc
+        hardware_pwm
         )
 
 pico_add_extra_outputs(Joystick)
