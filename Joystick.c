@@ -25,11 +25,12 @@
 #define I2C_PORT i2c1
 #define endereco 0x3C
 #define WRAP_PERIOD 4096
-#define PWM_DIVISOR 254.6
 #define STEP 5
 
 // Variáveis Globais
 static volatile uint32_t last_time = 0; // Armazena o tempo do último evento (em microssegundos)
+static volatile uint slice_red, slice_blue;
+static volatile bool pwm_state = true;
 
 // Protótipos das Funções
 void init();
@@ -45,8 +46,8 @@ int main()
     // Variáveis
     uint16_t adc_value_x;
     uint16_t adc_value_y;
-    uint slice_red = pwm_init_gpio(LED_PIN_RED, WRAP_PERIOD);
-    uint slice_blue = pwm_init_gpio(LED_PIN_BLUE, WRAP_PERIOD);
+    slice_red = pwm_init_gpio(LED_PIN_RED, WRAP_PERIOD);
+    slice_blue = pwm_init_gpio(LED_PIN_BLUE, WRAP_PERIOD);
     bool cor = true;
 
     init(); // Inicialização dos Pinos
@@ -86,7 +87,7 @@ int main()
 void refresh_led_state_X(uint16_t x)
 {
 
-    uint16_t Position = x; 
+    uint16_t Position = x;
     static bool rise;
     if (Position >= 2048)
         rise = true;
@@ -97,12 +98,12 @@ void refresh_led_state_X(uint16_t x)
         Position = (Position % 2048);
     else
         Position = ((Position * -1) + 2048);
-    
+
     pwm_set_gpio_level(LED_PIN_RED, Position * 2); // define o ciclo ativo (Ton)
 }
 void refresh_led_state_Y(uint16_t y)
 {
-    uint16_t Position = y; 
+    uint16_t Position = y;
     static bool rise;
     if (Position >= 2048)
         rise = true;
@@ -113,7 +114,7 @@ void refresh_led_state_Y(uint16_t y)
         Position = (Position % 2048);
     else
         Position = ((Position * -1) + 2048);
-    
+
     pwm_set_gpio_level(LED_PIN_BLUE, Position * 2); // define o ciclo ativo (Ton)
 }
 void init()
@@ -146,6 +147,9 @@ static void gpio_irq_handler(uint gpio, uint32_t events)
         // Código Função:
         if (gpio == BUTTON_A)
         {
+            pwm_set_enabled(slice_blue, !pwm_state);
+            pwm_set_enabled(slice_red, !pwm_state);
+            pwm_state = !pwm_state;
         }
         else if (gpio == JOYSTICK_PB)
         {
