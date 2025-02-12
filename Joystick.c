@@ -147,15 +147,39 @@ static void gpio_irq_handler(uint gpio, uint32_t events)
         // Código Função:
         if (gpio == BUTTON_A)
         {
-            pwm_set_enabled(slice_blue, !pwm_state);
-            pwm_set_enabled(slice_red, !pwm_state);
+            printf("BOTÃO A");
             pwm_state = !pwm_state;
+            pwm_set_enabled(slice_blue,pwm_state);
+            pwm_set_enabled(slice_red,pwm_state);
+            
         }
         else if (gpio == JOYSTICK_PB)
         {
+            uint count = 0;
             bool state = gpio_get(LED_PIN_GREEN);
-            gpio_put(LED_PIN_GREEN, !state);
-            printf("Joystick\n");
+
+            gpio_put(LED_PIN_GREEN, !state); // Alterna o Estado do LED Verde
+
+            if (count >=3)
+                count = 0;
+            switch (count)
+            {
+            case 0:
+
+                break;
+            case 1:
+
+                break;
+            case 2:
+
+                break;
+            
+            default:
+                printf("[ERRO]");
+                break;
+            }
+            count ++;
+            
         }
     }
 }
