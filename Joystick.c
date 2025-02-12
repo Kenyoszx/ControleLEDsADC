@@ -98,10 +98,23 @@ void refresh_led_state_X(uint16_t x)
     else
         Position = ((Position * -1) + 2048);
     
-    pwm_set_gpio_level(LED_PIN_RED, Position * 2); // define o ciclo ativo (Ton) de forma quadrática, para acentuar a variação de luminosidade.
+    pwm_set_gpio_level(LED_PIN_RED, Position * 2); // define o ciclo ativo (Ton)
 }
 void refresh_led_state_Y(uint16_t y)
 {
+    uint16_t Position = y; 
+    static bool rise;
+    if (Position >= 2048)
+        rise = true;
+    else
+        rise = false;
+
+    if (rise)
+        Position = (Position % 2048);
+    else
+        Position = ((Position * -1) + 2048);
+    
+    pwm_set_gpio_level(LED_PIN_BLUE, Position * 2); // define o ciclo ativo (Ton)
 }
 void init()
 {
