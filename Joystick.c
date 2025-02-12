@@ -11,27 +11,27 @@
 
 // Definição dos Pinos
 
-#define I2C_SDA 14
-#define I2C_SCL 15
-#define JOYSTICK_X_PIN 26 // GPIO para eixo X
-#define JOYSTICK_Y_PIN 27 // GPIO para eixo Y
-#define JOYSTICK_PB 22    // GPIO para botão do Joystick
-#define BUTTON_A 5         // GPIO para botão A
-#define LED_PIN_GREEN 11
-#define LED_PIN_BLUE 12
-#define LED_PIN_RED 13
+#define I2C_SDA 14        // SDA display
+#define I2C_SCL 15        // SCL display
+#define JOYSTICK_X_PIN 26 // eixo X
+#define JOYSTICK_Y_PIN 27 // eixo Y
+#define JOYSTICK_PB 22    // botão do Joystick
+#define BUTTON_A 5        // botão A
+#define LED_PIN_GREEN 11  // led verde
+#define LED_PIN_BLUE 12   // led azul
+#define LED_PIN_RED 13    // led vermelho
 
-//Constantes
+// Constantes
 #define I2C_PORT i2c1
 #define endereco 0x3C
 #define WRAP_PERIOD 4096
 #define PWM_DIVISOR 254.6
 #define STEP 5
 
-//Variáveis Globais
+// Variáveis Globais
 static volatile uint32_t last_time = 0; // Armazena o tempo do último evento (em microssegundos)
 
-//Protótipos das Funções
+// Protótipos das Funções
 void init();
 void refresh_led_state_X(uint16_t x);
 void refresh_led_state_Y(uint16_t y);
@@ -40,8 +40,8 @@ uint pwm_init_gpio(uint gpio, uint wrap);
 
 int main()
 {
-    stdio_init_all(); //inicialização entrada e saída 
-    
+    stdio_init_all(); // inicialização entrada e saída
+
     // Variáveis
     uint16_t adc_value_x;
     uint16_t adc_value_y;
@@ -51,7 +51,7 @@ int main()
 
     init(); // Inicialização dos Pinos
 
-    //Inicialização do I2C
+    // Inicialização do I2C
 
     i2c_init(I2C_PORT, 400 * 1000);
     gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);                    // Set the GPIO pin function to I2C
@@ -62,14 +62,13 @@ int main()
     ssd1306_init(&ssd, WIDTH, HEIGHT, false, endereco, I2C_PORT); // Inicializa o display
     ssd1306_config(&ssd);                                         // Configura o display
     ssd1306_send_data(&ssd);                                      // Envia os dados para o display
-    ssd1306_fill(&ssd, false); // Limpa o display. O display inicia com todos os pixels apagados.
+    ssd1306_fill(&ssd, false);                                    // Limpa o display. O display inicia com todos os pixels apagados.
     ssd1306_send_data(&ssd);
 
-    //Inicialização ADC
+    // Inicialização ADC
     adc_init();
     adc_gpio_init(JOYSTICK_X_PIN);
     adc_gpio_init(JOYSTICK_Y_PIN);
-    
 
     while (true)
     {
@@ -84,18 +83,18 @@ int main()
     }
 }
 
-void refresh_led_state_X(uint16_t x){
-    
+void refresh_led_state_X(uint16_t x)
+{
 }
-void refresh_led_state_Y(uint16_t y){
-
+void refresh_led_state_Y(uint16_t y)
+{
 }
-void init(){
+void init()
+{
     gpio_init(JOYSTICK_PB);
     gpio_set_dir(JOYSTICK_PB, GPIO_IN);
     gpio_pull_up(JOYSTICK_PB);
     gpio_set_irq_enabled_with_callback(JOYSTICK_PB, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler); // Rotina de Interrupção
-
 
     gpio_init(BUTTON_A);
     gpio_set_dir(BUTTON_A, GPIO_IN);
@@ -105,7 +104,6 @@ void init(){
     gpio_init(LED_PIN_GREEN);
     gpio_set_dir(LED_PIN_GREEN, GPIO_OUT);
     gpio_put(LED_PIN_GREEN, 0);
-
 }
 static void gpio_irq_handler(uint gpio, uint32_t events)
 {
@@ -121,22 +119,22 @@ static void gpio_irq_handler(uint gpio, uint32_t events)
         // Código Função:
         if (gpio == BUTTON_A)
         {
-            
         }
         else if (gpio == JOYSTICK_PB)
         {
             bool state = gpio_get(LED_PIN_GREEN);
-            gpio_put(LED_PIN_GREEN,!state);
+            gpio_put(LED_PIN_GREEN, !state);
             printf("Joystick\n");
         }
     }
 }
-uint pwm_init_gpio(uint gpio, uint wrap) {
+uint pwm_init_gpio(uint gpio, uint wrap)
+{
     gpio_set_function(gpio, GPIO_FUNC_PWM);
 
     uint slice_num = pwm_gpio_to_slice_num(gpio);
     pwm_set_wrap(slice_num, wrap);
-    
-    pwm_set_enabled(slice_num, true);  
-    return slice_num;  
+
+    pwm_set_enabled(slice_num, true);
+    return slice_num;
 }
